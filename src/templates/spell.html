@@ -1,6 +1,35 @@
 {% extends 'layout.html' %}
 {% block body %}
 
-<h1>spell-check</h1>
+<div class="container">
+  <div>
+    <br>
+  </div>
+  <form name="spell" action="/cs9163/hw02/spell_check" method="POST">
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Text to be checked</span>
+      </div>
+      <textarea class="form-control" id="inputtext" name="inputtext" aria-label="With textarea"></textarea>
+    </div>
+    <div class="input-group">
+      <button class="btn btn-primary" id="checkbutton" type="submit">Check</button>
+    </div>
+  </form>
+</div>
+<div class="container">
+  <table class="table">
+    <tr>
+      <th scope="col">supplied text</th>
+      <th scope="col">misspelled words</th>
+    </tr>
+    {% if response %}
+    <tr>
+      <th scope="col" id="textout">{{ response[0] }}</th>
+      <th scope="col" id="misspelled">{{ response[1] }}</th>
+    </tr>
+    {% endif %}
+  </table>
+</div>
 
 {% endblock %}
