@@ -10,7 +10,6 @@ import subprocess
 USER_DATABASE = { }
 
 
-
 def configure_routes(app):
 
 	# Home
