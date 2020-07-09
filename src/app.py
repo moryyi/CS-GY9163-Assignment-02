@@ -13,6 +13,15 @@ DATABASE = "./sqlite3/cs9163hw02.sqlite"
 
 def configure_routes(app):
 
+	# Setup of sqlite3 database
+	@app.before_first_request
+	def init_db():
+		# Create a new database for user registeration & login.
+		query_db("create table if not exists User (id integer primary key autoincrement, username varchar(30) not null, password varchar(30) not null, phone varchar(30) not null);", [])
+		# Delete existed records to clean up the database.
+		query_db("delete from User;", [])
+		return
+
 	# Home
 	@app.route('/cs9163/hw02/', methods=['GET'])
 	def home():
