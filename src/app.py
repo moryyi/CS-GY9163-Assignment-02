@@ -8,7 +8,6 @@ import base64, hashlib, random, string
 import sqlite3, subprocess
 
 
-
 DATABASE = "./sqlite3/cs9163hw02.sqlite"
 
 
@@ -167,9 +166,16 @@ def configure_routes(app):
 		subprocess.call("rm -rf ./{}".format(_tmp_filename), shell=True)
 		return out
 
+
+# Create Flask app as a global variable.
+# This enables app to be executed by command:
+#   - export FLASK_APP=app.py
+#   - flask run
+app = Flask(__name__, template_folder="./templates")
+app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKey"
+configure_routes(app)
+
+
 if __name__ == "__main__":
-	app = Flask(__name__, template_folder="./templates")
-	app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKey"
-	configure_routes(app)
 	app.run(debug=True)
 
