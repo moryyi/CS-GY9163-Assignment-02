@@ -45,8 +45,5 @@ Register, login into the website, and submit text for spell-checking.
    3. register: http://127.0.0.1:5000/cs9163/hw02/register
    4. spell check: http://127.0.0.1:5000/cs9163/hw02/spell_check &larr; require user login
 
-## Database info
-This project use SQLite3 as the backend database. The sqlite3 file is located in *src/sqlite3/cs9163hw02.sqlite*.
-
 ## References
 Some of the source codes are learnt from this Flask project Tutorial [Youtube Video](https://www.youtube.com/watch?v=d04xxdrc7Yw).

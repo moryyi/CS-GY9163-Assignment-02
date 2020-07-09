@@ -1,5 +1,4 @@
 flask
-sqlalchemy
 tox
 tox-travis
 pytest

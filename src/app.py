@@ -3,24 +3,15 @@
 
 
 from flask import Flask, request, render_template, session, logging, url_for, redirect, flash
-from flask import g
 import base64, hashlib, random, string
-import sqlite3, subprocess
+import subprocess
 
 
-DATABASE = "./sqlite3/cs9163hw02.sqlite"
+USER_DATABASE = { }
+
 
 
 def configure_routes(app):
-
-	# Setup of sqlite3 database
-	@app.before_first_request
-	def init_db():
-		# Create a new database for user registeration & login.
-		query_db("create table if not exists User (id integer primary key autoincrement, username varchar(30) not null, password varchar(30) not null, phone varchar(30) not null);", [])
-		# Delete existed records to clean up the database.
-		query_db("delete from User;", [])
-		return
 
 	# Home
 	@app.route('/cs9163/hw02/', methods=['GET'])
@@ -100,58 +91,30 @@ def configure_routes(app):
 
 
 	# Utils
-	def query_db(query, args=(), one=False):
-		conn = sqlite3.connect(DATABASE)
-		cur = conn.cursor()
-		cur.execute(query, args)
-		rv = cur.fetchall()
-		conn.close()
-		return (rv[0] if rv else None) if one else rv
-
-	def insert_db(query, args=()):
-		conn = sqlite3.connect(DATABASE)
-		cur = conn.cursor()
-		result = None
-		try:
-			cur.execute(query, args)
-			conn.commit()
-			result = True
-		except:
-			conn.roolback()
-			result = False
-		finally:
-			conn.close()
-		return result
-
 	def register_with_user_info(username, password, phone):
 		"""
 		return ifRegisterSuccess: bool, errorMessage: string
 		"""
-		# Get existed usernames
-		_username = query_db('select username from User where username = ?;', [username], one=True)
-		if _username is not None:
+		if username in USER_DATABASE.keys():
 			# Given username has been already registered
 			return (False, "failure")
 		else:
-			ifInsertSuccess = insert_db('insert into User values (null, ?,?,?);',
-							[username, password, phone])
-			if ifInsertSuccess:
-				return (True, "success")
-			else:
-				return (False, "failure")
+			USER_DATABASE[username] = {
+				"password": password,
+				"phone": phone
+			}
+			return (True, "success")
 
 	def login_with_user_info(username, password, phone):
 		"""
 		return ifLoginSuccess: bool, errorMessage: string
 		"""
-		_username = query_db('select username from User where username = ?;', [username], one=True)
-		if _username is None:
+		if username not in USER_DATABASE.keys():
 			return (False, "Incorrect")
 		else:
-			(_password, _phone) = query_db('select password, phone from User where username = ?;', [username], one=True)
-			if _password != password:
+			if password != USER_DATABASE[username]["password"]:
 				return (False, "Incorrect")
-			elif _phone != phone:
+			elif phone != USER_DATABASE[username]["phone"]:
 				return (False, "Two-factor failure")
 			else:
 				return (True, "Login success")
