@@ -5,12 +5,16 @@
 from flask import Flask, request, render_template, session, logging, url_for, redirect, flash
 from flask import make_response
 from flask_wtf.csrf import CSRFProtect
+from flask_paranoid import Paranoid
 from wtforms.validators import DataRequired
 from wtforms import StringField, PasswordField
 import base64, hashlib, random, string
 import subprocess
+import sys
 
-from src.myForms import RegisterForm, LoginForm, ContentForm
+# from src.myForms import RegisterForm, LoginForm, ContentForm
+sys.path.append(".")
+from myForms import RegisterForm, LoginForm, ContentForm
 
 
 USER_DATABASE = {}
@@ -34,8 +38,10 @@ def configure_routes(app):
 			(ifLoginSuccess, errorMessage) = login_with_user_info(username, password, phone)
 			if ifLoginSuccess:
 				session["log"] = True
+				session["session_id"] = gen_random_string(16)
 				flash(["result", errorMessage], "success")
 				resp = make_response(redirect(url_for('spell_check')))
+				resp.set_cookie('session_id', session["session_id"])
 				return resp
 			else:
 				flash(["result", errorMessage], "danger")
@@ -46,8 +52,7 @@ def configure_routes(app):
 	# Logout
 	@app.route(ROOT_URL + '/logout', methods=['GET'])
 	def logout():
-		session["log"] = False
-		session.pop("username", None)
+		session.clear()
 		return redirect(url_for("login"))
 
 
@@ -123,9 +128,11 @@ def configure_routes(app):
 			else:
 				return (True, "Login success")
 
+	def gen_random_string(num):
+		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(num))
 
 	def gen_random_filename():
-		_f = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+		_f = gen_random_string(16)
 		return "tmp_" + base64.urlsafe_b64encode(hashlib.md5(_f.encode()).digest()).decode()
 
 
@@ -161,7 +168,9 @@ app.config.update(
 	PERMANENT_SESSION_LIFETIME=600
 )
 csrf = CSRFProtect(app)
+paranoid = Paranoid(app)
 configure_routes(app)
+paranoid.redirect_view = ROOT_URL + '/login'
 
 if __name__ == "__main__":
 	app.run(debug=True)
