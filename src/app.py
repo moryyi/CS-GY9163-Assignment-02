@@ -144,7 +144,6 @@ def configure_routes(app):
 		return ifRegisterSuccess: bool, errorMessage: string
 		"""
 		password = generate_password_hash(password)
-		print(password)
 		if username in USER_DATABASE.keys():
 			# Given username has been already registered
 			return (False, "failure")
@@ -164,7 +163,6 @@ def configure_routes(app):
 			return (False, "Incorrect")
 		else:
 			password = generate_password_hash(password)
-			print(password)
 			# if password != USER_DATABASE[username]["password"]:
 			if check_password_hash(password, USER_DATABASE[username]["password"]):
 				return (False, "Incorrect")
