@@ -13,27 +13,27 @@ Register, login into the website, and submit text for spell-checking.
 - Install requirements with pip
 
   ```sh
-  pip3 install -r requirements.txt
+  pip install -r requirements.txt
   ```
   
-## Test with pytest
-- To test the service with pytest, enter the root folder of this project
+## Test with unittest
+- To test the service with *unittest*, execute the script in *./tests/myunittest.py*
 
   ```sh
-  export PYTHONPATH="$PYTHONPATH:$PWD"
-  pytest
+  python ./tests/myunittest.py
   ```
 
 ## Start the service
 - To start this Flask application
-- On win10 with WSL Ubuntu:
   ```sh
   chmod +x app.py
   ./app.py
   ```
 
-- On Ubuntu 18 Virtual Machine with Flask command:
+  or with Flask command (tested in Ubuntu VM):
   ```sh
+  cd src/
+  export FLASK_APP=app.py
   flask run
   ```
 
@@ -45,5 +45,14 @@ Register, login into the website, and submit text for spell-checking.
    3. register: http://127.0.0.1:5000/cs9163/hw02/register
    4. spell check: http://127.0.0.1:5000/cs9163/hw02/spell_check &larr; require user login
 
-## References
+## About testing
+This assignment project has switched from *pytest* to *unittest*.
+
+One of the most important reasons for this is that, by using *pytest*, it is difficult to perform testing along with CSRF protection, provided by **flask_wtf**.
+
+Besides, when using *unittest*, `app.config["WTF_CSRF_ENABLED"] = False` can successfully turn off CSRF protection in order to simply check whether these routes are reachable. But this config setting doesn't work when using *pytest*.
+
+In brief, testcases in this project only perform without CSRF protection and only check whether the requests and responses are successfully sent and received.
+
+## Others
 Some of the source codes are learnt from this Flask project Tutorial [Youtube Video](https://www.youtube.com/watch?v=d04xxdrc7Yw).
