@@ -23,6 +23,13 @@ ROOT_URL = "/cs9163/hw02"
 
 def configure_routes(app):
 
+	# Content-Security-Headers
+	@app.after_request
+	def add_security_headers(resp):
+		resp.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' stackpath.bootstrapcdn.com;"
+		resp.headers['X-Frame-Options'] = "SAMEORIGIN"
+		return resp
+
 	# Login
 	@app.route(ROOT_URL + '/login', methods=['GET', 'POST'])
 	def login():
