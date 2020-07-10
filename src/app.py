@@ -3,49 +3,48 @@
 
 
 from flask import Flask, request, render_template, session, logging, url_for, redirect, flash
+from flask import make_response
+from flask_wtf.csrf import CSRFProtect
+from wtforms.validators import DataRequired
+from wtforms import StringField, PasswordField
 import base64, hashlib, random, string
 import subprocess
 
+from src.myForms import RegisterForm, LoginForm, ContentForm
 
-USER_DATABASE = { }
 
+USER_DATABASE = {}
+
+ROOT_URL = "/cs9163/hw02"
 
 def configure_routes(app):
 
-	# Home
-	@app.route('/cs9163/hw02/', methods=['GET'])
-	def home():
-		if 'username' in session:
-			return redirect(url_for("spell_check"))
-		else:
-			return redirect(url_for("login"))
-
 	# Login
-	@app.route('/cs9163/hw02/login', methods=['GET', 'POST'])
+	@app.route(ROOT_URL + '/login', methods=['GET', 'POST'])
 	def login():
 		if "log" in session and session["log"]:
-			flash(["success", "User: {} already logged in".format(session["username"])], "success")
-			return redirect(url_for("spell_check"))
-		else:
-			if request.method == 'POST':
-				username = request.form.get("uname")
-				password = request.form.get("pword")
-				phone = request.form.get("2fa")
-				(ifLoginSuccess, errorMessage) = login_with_user_info(username, password, phone)
-				if ifLoginSuccess:
-					session["log"] = True
-					session["username"] = username
-					flash(["result", errorMessage], "success")
-					return redirect(url_for("spell_check"))
-				else:
-					flash(["result", errorMessage], "danger")
-					return render_template('./login.html')
+			resp = make_response(redirect(url_for('spell_check')))
+			return resp
+		
+		form = LoginForm()
+		if form.validate_on_submit():
+			username = form.username.data
+			password = form.password.data
+			phone = form.phone.data
+			(ifLoginSuccess, errorMessage) = login_with_user_info(username, password, phone)
+			if ifLoginSuccess:
+				session["log"] = True
+				flash(["result", errorMessage], "success")
+				resp = make_response(redirect(url_for('spell_check')))
+				return resp
 			else:
-				return render_template('./login.html')
+				flash(["result", errorMessage], "danger")
+		resp = make_response(render_template("./login.html", form=form))
+		return resp
 
 
 	# Logout
-	@app.route('/cs9163/hw02/logout', methods=['GET'])
+	@app.route(ROOT_URL + '/logout', methods=['GET'])
 	def logout():
 		session["log"] = False
 		session.pop("username", None)
@@ -53,40 +52,45 @@ def configure_routes(app):
 
 
 	# Registeration
-	@app.route('/cs9163/hw02/register', methods=['GET', 'POST'])
+	@app.route(ROOT_URL + '/register', methods=['GET', 'POST'])
 	def register():
 		if "log" in session and session["log"]:
-			flash(["success", "User: {} already logged in".format(session["username"])], "success")
-			return redirect(url_for("spell_check"))
-		else:
-			if request.method == "POST":
-				username = request.form.get("uname")
-				password = request.form.get("pword")
-				phone = request.form.get("2fa")
-				(ifRegisterSuccess, errorMessage) = register_with_user_info(username, password, phone)
-				if ifRegisterSuccess:
-					flash(["success", errorMessage], "success")
-					return render_template('./login.html')
-				else:
-					flash(["success", errorMessage], "danger")
-					return render_template('./register.html')
+			resp = make_response(redirect(url_for('spell_check')))
+			return resp
+		form = RegisterForm()
+		if form.validate_on_submit():
+			username = form.username.data
+			password = form.password.data
+			phone = form.phone.data
+			(ifRegisterSuccess, errorMessage) = register_with_user_info(username, password, phone)
+			if not ifRegisterSuccess:
+				flash(["success", errorMessage], "danger")
 			else:
-				return render_template('./register.html')
+				flash(["success", errorMessage], "success")
+				resp = make_response(redirect(url_for('login')))
+				return resp
+		resp = make_response(render_template("./register.html", form=form))
+		return resp
 
 
 	# Spell-Check
-	@app.route('/cs9163/hw02/spell_check', methods=['GET', 'POST'])
+	@app.route(ROOT_URL + '/spell_check', methods=['GET', 'POST'])
 	def spell_check():
-		if request.method == 'POST':
-			content = request.form.get("inputtext")
+		form = ContentForm()
+		if form.validate_on_submit():
+			content = form.inputtext.data
 			misspelled_words = check_text_spelling(content)
-			response = [content, misspelled_words]
-			return render_template('./spell.html', response=response)
+			response = [content, misspelled_words]			
+			resp = make_response(render_template('./spell.html', response=response, form=form))
+			return resp
+
 		else:
 			if "log" in session and session["log"]:
-				return render_template('./spell.html')
+				resp = make_response(render_template('./spell.html', form=form))
+				return resp
 			else:
-				return redirect(url_for("login"))
+				resp = make_response(redirect(url_for('login')))
+				return resp
 
 
 	# Utils
@@ -103,6 +107,7 @@ def configure_routes(app):
 				"phone": phone
 			}
 			return (True, "success")
+
 
 	def login_with_user_info(username, password, phone):
 		"""
@@ -144,9 +149,19 @@ def configure_routes(app):
 #   - flask run
 app = Flask(__name__, template_folder="./templates")
 app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKey"
-configure_routes(app)
+app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+# Random secret_key does work, but this will lose all existed sessions
+# when current flask application restarts.
+# app.secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
+# app.WTF_CSRF_SECRET_KEY = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
 
+app.config.update(
+	SESSION_COOKIE_HTTPONLY=True,
+	SESSION_COOKIE_SAMESITE='Lax',
+	PERMANENT_SESSION_LIFETIME=600
+)
+csrf = CSRFProtect(app)
+configure_routes(app)
 
 if __name__ == "__main__":
 	app.run(debug=True)
-

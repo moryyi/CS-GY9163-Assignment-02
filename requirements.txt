@@ -1,4 +1,6 @@
 flask
+Flask-Testing
+flask_wtf
 tox
 tox-travis
 pytest
