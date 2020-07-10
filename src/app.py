@@ -54,6 +54,7 @@ def configure_routes(app):
 	def add_security_headers(resp):
 		resp.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' stackpath.bootstrapcdn.com;"
 		resp.headers['X-Frame-Options'] = "SAMEORIGIN"
+		resp.headers['X-Content-Type-Options'] = "nosniff"
 		return resp
 
 	# Login
@@ -74,7 +75,7 @@ def configure_routes(app):
 				session["session_id"] = gen_random_string(16)
 				flash(["result", errorMessage], "success")
 				resp = make_response(redirect(url_for('spell_check')))
-				resp.set_cookie('session_id', session["session_id"])
+				resp.set_cookie('session_id', session["session_id"], httponly=True, sametime='Lax')
 				return resp
 			else:
 				flash(["result", errorMessage], "danger")
