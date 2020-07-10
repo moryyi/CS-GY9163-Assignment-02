@@ -1,4 +1,5 @@
 flask
+flask-paranoid
 Flask-Testing
 flask_wtf
 tox
