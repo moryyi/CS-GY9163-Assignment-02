@@ -10,10 +10,13 @@ from wtforms.validators import DataRequired
 from wtforms import StringField, PasswordField
 import base64, hashlib, random, string
 import subprocess
-import sys
+import sys, os
 
 # from src.myForms import RegisterForm, LoginForm, ContentForm
-sys.path.append(".")
+BASE_DIR = os.path.dirname(
+	os.path.dirname(os.path.abspath(__file__))
+)
+sys.path.append(BASE_DIR)
 from myForms import RegisterForm, LoginForm, ContentForm
 
 
