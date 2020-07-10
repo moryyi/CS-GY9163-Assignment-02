@@ -55,6 +55,7 @@ def configure_routes(app):
 		resp.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' stackpath.bootstrapcdn.com;"
 		resp.headers['X-Frame-Options'] = "SAMEORIGIN"
 		resp.headers['X-Content-Type-Options'] = "nosniff"
+		resp.headers['X-XSS-Protection'] = '1; mode=block'
 		return resp
 
 	# Login
@@ -71,8 +72,10 @@ def configure_routes(app):
 			phone = form.phone.data
 			(ifLoginSuccess, errorMessage) = login_with_user_info(username, password, phone)
 			if ifLoginSuccess:
+				session.clear()
 				session["log"] = True
 				session["session_id"] = gen_random_string(16)
+				session.permanent = True
 				flash(["result", errorMessage], "success")
 				resp = make_response(redirect(url_for('spell_check')))
 				resp.set_cookie('session_id', session["session_id"], httponly=True, sametime='Lax')
