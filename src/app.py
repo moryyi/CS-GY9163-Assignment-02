@@ -4,20 +4,43 @@
 
 from flask import Flask, request, render_template, session, logging, url_for, redirect, flash
 from flask import make_response
+from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_paranoid import Paranoid
 from wtforms.validators import DataRequired
-from wtforms import StringField, PasswordField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField
 import base64, hashlib, random, string
 import subprocess
 import sys, os
 
 # from src.myForms import RegisterForm, LoginForm, ContentForm
-BASE_DIR = os.path.dirname(
-	os.path.dirname(os.path.abspath(__file__))
-)
-sys.path.append(BASE_DIR)
-from myForms import RegisterForm, LoginForm, ContentForm
+# BASE_DIR = os.path.dirname(
+# 	os.path.dirname(os.path.abspath(__file__))
+# )
+# sys.path.append(BASE_DIR)
+# from myForms import RegisterForm, LoginForm, ContentForm
+class RegisterForm(FlaskForm):
+	username = StringField(id="uname", validators=[DataRequired()],
+													render_kw={'placeholder': 'Username'})
+	password = PasswordField(id="pword", validators=[DataRequired()],
+													render_kw={'placeholder': 'Password'})
+	phone = StringField(id="2fa", validators=[DataRequired()],
+													render_kw={'placeholder': 'Cell Phone Number'})
+	submit = SubmitField("submit")
+
+class LoginForm(FlaskForm):
+	username = StringField(id="uname", validators=[DataRequired()],
+													render_kw={'placeholder': 'Username'})
+	password = PasswordField(id="pword", validators=[DataRequired()],
+													render_kw={'placeholder': 'Password'})
+	phone = StringField(id="2fa", validators=[DataRequired()],
+													render_kw={'placeholder': 'Cell Phone Number'})
+	login = SubmitField("login")
+
+class ContentForm(FlaskForm):
+  inputtext = TextAreaField(id="inputtext", validators=[DataRequired()],
+                          render_kw={'placeholder': 'Text to check spelling', 'aria-label': 'With textarea'})
+  submit = SubmitField("check")
 
 
 USER_DATABASE = {}
