@@ -88,7 +88,6 @@ class MyTest(TestCase):
     url = ROOT_URL + "/register"
     response = client.post(url, data={"uname": "testusername", "pword": "testpassword", "2fa": "testnumber"})
     response = client.post(url, data={"uname": "testusername", "pword": "testpassword", "2fa": "testnumber"})
-    print(response.data)
     assert response.status_code == 200
 
 
