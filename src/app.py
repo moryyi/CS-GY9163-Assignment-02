@@ -9,6 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_paranoid import Paranoid
 from wtforms.validators import DataRequired
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField
+from werkzeug.security import generate_password_hash, check_password_hash
 import base64, hashlib, random, string
 import subprocess
 import sys, os
@@ -38,9 +39,9 @@ class LoginForm(FlaskForm):
 	login = SubmitField("login")
 
 class ContentForm(FlaskForm):
-  inputtext = TextAreaField(id="inputtext", validators=[DataRequired()],
-                          render_kw={'placeholder': 'Text to check spelling', 'aria-label': 'With textarea'})
-  submit = SubmitField("check")
+	inputtext = TextAreaField(id="inputtext", validators=[DataRequired()],
+													render_kw={'placeholder': 'Text to check spelling', 'aria-label': 'With textarea'})
+	submit = SubmitField("check")
 
 
 USER_DATABASE = {}
@@ -70,6 +71,7 @@ def configure_routes(app):
 			username = form.username.data
 			password = form.password.data
 			phone = form.phone.data
+
 			(ifLoginSuccess, errorMessage) = login_with_user_info(username, password, phone)
 			if ifLoginSuccess:
 				session.clear()
@@ -78,7 +80,7 @@ def configure_routes(app):
 				session.permanent = True
 				flash(["result", errorMessage], "success")
 				resp = make_response(redirect(url_for('spell_check')))
-				resp.set_cookie('session_id', session["session_id"], httponly=True, sametime='Lax')
+				resp.set_cookie('session_id', session["session_id"], httponly=True, samesite='Lax')
 				return resp
 			else:
 				flash(["result", errorMessage], "danger")
@@ -104,6 +106,7 @@ def configure_routes(app):
 			username = form.username.data
 			password = form.password.data
 			phone = form.phone.data
+
 			(ifRegisterSuccess, errorMessage) = register_with_user_info(username, password, phone)
 			if not ifRegisterSuccess:
 				flash(["success", errorMessage], "danger")
@@ -140,6 +143,8 @@ def configure_routes(app):
 		"""
 		return ifRegisterSuccess: bool, errorMessage: string
 		"""
+		password = generate_password_hash(password)
+		print(password)
 		if username in USER_DATABASE.keys():
 			# Given username has been already registered
 			return (False, "failure")
@@ -158,7 +163,10 @@ def configure_routes(app):
 		if username not in USER_DATABASE.keys():
 			return (False, "Incorrect")
 		else:
-			if password != USER_DATABASE[username]["password"]:
+			password = generate_password_hash(password)
+			print(password)
+			# if password != USER_DATABASE[username]["password"]:
+			if check_password_hash(password, USER_DATABASE[username]["password"]):
 				return (False, "Incorrect")
 			elif phone != USER_DATABASE[username]["phone"]:
 				return (False, "Two-factor failure")
