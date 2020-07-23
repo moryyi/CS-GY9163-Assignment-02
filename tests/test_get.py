@@ -2,16 +2,20 @@
 # coding: utf-8
 
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 
 from src.app import configure_routes
 
-ROOT_URL = "/cs9163/hw02"
+ROOT_URL = ""
 
 def test_home_route():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   app.testing = True
   configure_routes(app)
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/"
@@ -26,8 +30,11 @@ def test_home_route():
 def test_login_get():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   app.testing = True
   configure_routes(app)
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/login"
@@ -42,8 +49,11 @@ def test_login_get():
 def test_register_get():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   app.testing = True
   configure_routes(app)
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/register"
@@ -58,8 +68,11 @@ def test_register_get():
 def test_spell_get():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   app.testing = True
   configure_routes(app)
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/spell_check"

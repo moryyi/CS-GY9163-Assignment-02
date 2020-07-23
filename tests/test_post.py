@@ -2,16 +2,21 @@
 # coding: utf-8
 
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
+from flask.testing import FlaskClient as BaseFlaskClient
 
 from src.app import configure_routes
 
-ROOT_URL = "/cs9163/hw02"
+ROOT_URL = ""
 
 def test_login_without_register_post():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
-  configure_routes(app)
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   app.testing = True
+  csrf = CSRFProtect(app)
+  configure_routes(app, csrf)
   client = app.test_client()
 
   url = ROOT_URL + "/login"
@@ -24,8 +29,11 @@ def test_login_without_register_post():
 def test_first_register_post():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+  
   configure_routes(app)
   app.testing = True
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/register"
@@ -38,8 +46,11 @@ def test_first_register_post():
 def test_existed_register_post():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   configure_routes(app)
   app.testing = True
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/register"
@@ -53,8 +64,11 @@ def test_existed_register_post():
 def test_login_with_correct_data_post():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   configure_routes(app)
   app.testing = True
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/register"
@@ -69,8 +83,11 @@ def test_login_with_correct_data_post():
 def test_multiple_login_with_correct_data_post():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   configure_routes(app)
   app.testing = True
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/register"
@@ -86,8 +103,11 @@ def test_multiple_login_with_correct_data_post():
 def test_login_with_incorrect_data_post():
   app = Flask(__name__, template_folder='../src/templates')
   app.secret_key = "CS9163Assignment02WebsiteFlaskSessionSecretKeyForPytestOnly"
+  app.WTF_CSRF_SECRET_KEY = "CS9163Assignment02WebsiteFlaskWTFCSRFToken"
+
   configure_routes(app)
   app.testing = True
+  csrf = CSRFProtect(app)
   client = app.test_client()
 
   url = ROOT_URL + "/register"
